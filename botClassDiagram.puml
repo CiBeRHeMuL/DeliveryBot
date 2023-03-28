@@ -1,0 +1,22 @@
+@startuml
+
+abstract class RequestAbstract {
+map<string, string> getData()
+string getData(string key)
+}
+abstract class ResponseAbstract {
+send(map<string, string> data)
+}
+
+abstract class DirectionAbstract {
+size_t getXSteps()
+size_t getYSteps()
+static string toString()
+static DirectionAbstract &fromString()
+}
+
+abstract class EngineAbstract {
+move()
+}
+
+@enduml

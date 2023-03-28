@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  opencv-bot:
+    image: spmallick/opencv-docker:opencv
+    container_name: opencv-bot-container
+  cmake-bot:
+    image: anvari/cmake
+    container_name: cmake-bot-container
+  gcc-bot:
+    image: gcc
+    container_name: gcc-bot-container
