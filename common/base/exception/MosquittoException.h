@@ -1,11 +1,8 @@
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include "ExceptionBase.h"
 
-using namespace std;
-
-class MosquittoException : public runtime_error {
+class MosquittoException : public ExceptionBase {
 public:
-	explicit MosquittoException(const string &msg) : runtime_error(msg) {}
+	explicit MosquittoException(const string &msg) : ExceptionBase(msg) {}
 };

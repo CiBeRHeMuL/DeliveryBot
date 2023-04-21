@@ -1,11 +1,8 @@
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include "ExceptionBase.h"
 
-using namespace std;
-
-class RequestException : public runtime_error {
+class RequestException : public ExceptionBase {
 public:
-	explicit RequestException(const string &msg) : runtime_error(msg) {}
+	explicit RequestException(const string &msg) : ExceptionBase(msg) {}
 };

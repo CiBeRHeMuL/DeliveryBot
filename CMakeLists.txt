@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.26)
 
 set(PROJECT_NAME "DeliveryBot")
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 project(${PROJECT_NAME})
 

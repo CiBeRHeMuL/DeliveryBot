@@ -4,7 +4,8 @@
 
 using namespace std;
 
-class BotState {
+class BotStatus {
 public:
 	const string MOVING = "moving";
+	const string WAITING = "waiting";
 };

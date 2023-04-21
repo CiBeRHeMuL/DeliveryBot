@@ -1,10 +1,8 @@
 #pragma once
 
-#include <exception>
+#include "ExceptionBase.h"
 
-using namespace std;
-
-class DirectionException : public exception {
+class DirectionException : public ExceptionBase {
 public:
-	DirectionException(const char *msg) : exception(msg) {}
+	explicit DirectionException(const string &msg) : ExceptionBase(msg) {}
 };

@@ -1,6 +1,11 @@
 set(BOT_EXE_NAME "${PROJECT_NAME}Bot")
+set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_HAVE_THREADS_LIBRARY 1)
+set(CMAKE_USE_WIN32_THREADS_INIT 0)
+set(CMAKE_USE_PTHREADS_INIT 1)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-add_executable(${BOT_EXE_NAME} main.cpp base/engine/EngineAbstract.h ../common/base/direction/DirectionAbstract.h EngineManager.h ../common/base/network/request/RequestInterface.h ../common/base/exception/DirectionException.h ../common/enums/BotStatus.h ../common/network/request/MQTTRequest.h ../common/base/network/request/RequestAbstract.h)
+add_executable(${BOT_EXE_NAME} main.cpp)
 
 target_link_libraries(${BOT_EXE_NAME} mosquitto)
-target_link_libraries(${BOT_EXE_NAME} config++)

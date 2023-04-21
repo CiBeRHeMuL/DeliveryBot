@@ -1,11 +1,9 @@
 #pragma once
 
 #include "../../exception/MosquittoException.h"
-#include "MosquittoSettings.h"
 #include "MosquittoAbstract.h"
-#include "../../config/Config.h"
+#include "../../config/setting/IniSetting.h"
 
-#include <libconfig.h++>
 #include <mosquitto.h>
 #include <string>
 
@@ -18,28 +16,33 @@ protected:
 	int m_QoS;
 	bool m_retaining;
 
-	void readConfig(const libconfig::Config &config) {
-		libconfig::Setting &root = config.getRoot().lookup("Publisher");
-		if (!root.exists("topic") || !root.exists("qos") || !root.exists("retaining")) {
-			throw MosquittoException("Bad config");
-		}
+	void readConfig(SettingInterface &config) {
 		try {
-			root.lookupValue("topic", m_topic);
-			root.lookupValue("qos", m_QoS);
-			root.lookupValue("retaining", m_retaining);
+			m_topic = static_cast<string>(config["topic"]);
+			m_QoS = static_cast<int>(config["QoS"]);
+			m_retaining = static_cast<bool>(config["retaining"]);
+			m_clientId = static_cast<string>(config["clientId"]);
 		} catch (...) {
-			throw MosquittoException("Failed to read config");
+			throw MosquittoException("Invalid config");
 		}
-	}
-
-	explicit MosquittoPublisher(const libconfig::Config &config) : MosquittoAbstract(), m_QoS(), m_topic(), m_retaining() {
-		readConfig(config);
 	}
 
 public:
-	static MosquittoPublisher *getInstance() {
-		static MosquittoPublisher mosquittoPublisher(Config::getConfig());
-		return &mosquittoPublisher;
+	explicit MosquittoPublisher(SettingInterface *config) : MosquittoAbstract(), m_QoS(), m_topic(), m_retaining() {
+		readConfig(*config);
+		connectToMQTTBroker();
+	}
+
+	~MosquittoPublisher() = default;
+
+	static MosquittoPublisher *getInstance(SettingInterface *config = nullptr) {
+		static MosquittoPublisher *instance = nullptr;
+		if (instance == nullptr && config != nullptr) {
+			instance = new MosquittoPublisher(config);
+		} else if (instance == nullptr && config == nullptr) {
+			throw MosquittoException("Cannot initialize MosquittoPublisher without config");
+		}
+		return instance;
 	}
 
 	bool publishMessage(const string &msg) {

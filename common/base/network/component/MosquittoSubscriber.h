@@ -1,10 +1,9 @@
 #pragma once
 
 #include "../../exception/MosquittoException.h"
-#include "MosquittoSettings.h"
 #include "MosquittoAbstract.h"
+#include "../../config/setting/SettingInterface.h"
 
-#include <libconfig.h++>
 #include <mosquitto.h>
 #include <string>
 #include <functional>
@@ -24,24 +23,22 @@ protected:
 	string m_topic;
 	int m_QoS;
 
-	void readConfig(const libconfig::Config &config) {
-		libconfig::Setting &root = config.getRoot();
-		if (!root.exists("topic") || !root.exists("qos")) {
-			throw MosquittoException("Bad config");
-		}
+	void readConfig(SettingInterface &config) {
 		try {
-			root.lookupValue("topic", m_topic);
-			root.lookupValue("qos", m_QoS);
+			m_topic = static_cast<string>(config["topic"]);
+			m_QoS = static_cast<int>(config["QoS"]);
+			m_clientId = static_cast<string>(config["clientId"]);
 		} catch (...) {
-			throw MosquittoException("Failed to read config");
+			throw MosquittoException("Invalid config");
 		}
 	}
 
 public:
-	MosquittoSubscriber(const libconfig::Config &config, void (*callback) (mosquitto *, void *, const mosquitto_message *))
+	MosquittoSubscriber(SettingInterface *config, void (*callback) (mosquitto *, void *, const mosquitto_message *))
 		: MosquittoAbstract(), m_callback(callback), m_QoS(), m_topic()
 	{
-		readConfig(config);
+		readConfig(*config);
+		connectToMQTTBroker();
 		int subRes = mosquitto_subscribe(m_mosquitto, m_msgId, m_topic.c_str(), m_QoS);
 		if (subRes != MOSQ_ERR_SUCCESS) {
 			throw MosquittoException("Failed to subscribe to topic " + m_topic);
@@ -66,6 +63,10 @@ public:
 			throw MosquittoException("Failed to start listening loop");
 		}
 		m_isListening = true;
+	}
+
+	bool isListening() const {
+		return m_isListening;
 	}
 
 	void stopListen() {

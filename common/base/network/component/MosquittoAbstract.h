@@ -10,13 +10,17 @@ using namespace std;
 
 class MosquittoAbstract {
 protected:
-	mosquitto *m_mosquitto;
+	mosquitto *m_mosquitto{};
 
 	int *m_msgId;
 
-public:
-	MosquittoAbstract() : m_msgId(new int(0)) {
-		m_mosquitto = mosquitto_new(MOSQUITTO_CLIENT_ID, false, nullptr);
+	string m_clientId = "mosq_client_id";
+
+	/**
+	 * Надо вызвать в конструкторе для загрузки id клиента из конфига
+	 */
+	void connectToMQTTBroker() {
+		m_mosquitto = mosquitto_new(m_clientId.c_str(), false, nullptr);
 		if (m_mosquitto == nullptr) {
 			throw MosquittoException("Failed to instantiate mosquitto client");
 		} else {
@@ -24,6 +28,13 @@ public:
 			if (connectRes != MOSQ_ERR_SUCCESS) {
 				throw MosquittoException("Failed to connect to mosquitto broker");
 			}
+		}
+	}
+
+public:
+	explicit MosquittoAbstract(bool loadMQTTLazy = true) : m_msgId(new int(0)) {
+		if (!loadMQTTLazy) {
+			connectToMQTTBroker();
 		}
 	}
 

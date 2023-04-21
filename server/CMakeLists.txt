@@ -5,8 +5,9 @@ set(CMAKE_PREFIX_PATH "/mnt/c/lib/opencv/build")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(${SERVER_EXE_NAME} main.cpp)
+file(GLOB SOURCES "common/base/*.h")
+
+add_executable(${SERVER_EXE_NAME} main.cpp ${SOURCES})
 
 target_link_libraries(${SERVER_EXE_NAME} ${OpenCV_LIBS})
 target_link_libraries(${SERVER_EXE_NAME} mosquitto)
-target_link_libraries(${SERVER_EXE_NAME} config++)
