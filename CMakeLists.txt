@@ -11,3 +11,4 @@ include_directories(${INCLUDE_DIR})
 
 add_subdirectory(bot)
 add_subdirectory(server)
+add_subdirectory(tests)

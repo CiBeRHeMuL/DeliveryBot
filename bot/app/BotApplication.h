@@ -5,10 +5,13 @@
 #include "../../common/base/exception/ConfigException.h"
 #include "../../common/base/log/ConsoleLog.h"
 #include "../../common/base/network/component/MosquittoSubscriber.h"
+#include "../../common/base/command/BotCommand.h"
+
+#include <sstream>
 
 class BotApplication : public virtual ApplicationAbstract {
 protected:
-	void (*m_mosqCallback) (mosquitto *mosquitto, void *user, const mosquitto_message *message);
+	function<void(BotCommand &)> m_callback;
 
 	MosquittoSubscriber *m_mosqSubscriber;
 
@@ -25,23 +28,47 @@ protected:
 		return config;
 	}
 
+	static void baseMosquittoCallback(mosquitto *mosquitto, void *user, const mosquitto_message *message) {
+		stringstream ss(string(reinterpret_cast<char *>(message->payload), message->payloadlen));
+		BotCommand cmd;
+		string a(reinterpret_cast<char *>(message->payload), message->payloadlen);
+
+		string key;
+		string data;
+		while (!ss.eof()) {
+			getline(ss, key, '=');
+			getline(ss, data, '\n');
+			cmd.setInstruction(key, data);
+		}
+		auto *app = BotApplication::getApp();
+		app->m_callback(cmd);
+	}
+
 public:
 	const char *CONFIG_FILE = "bot.ini";
 
-	explicit BotApplication(void (*func) (mosquitto *mosquitto, void *user, const mosquitto_message *message)) : m_mosqCallback(func)
+	explicit BotApplication(function<void(BotCommand &)> &&func) : m_callback(std::move(func))
 	{
 		m_config = createConfig();
 		if (m_config->getRoot() == nullptr) {
 			throw ConfigException("Invalid config");
 		}
 		m_logger = new Logger(createLogger(m_config->getRoot()->getChildById("App")->getChildById("logName")->getString()));
-		m_mosqSubscriber = new MosquittoSubscriber(m_config->getRoot()->getChildById("Mosquitto"), m_mosqCallback);
+		m_mosqSubscriber = new MosquittoSubscriber(m_config->getRoot()->getChildById("Mosquitto"), baseMosquittoCallback);
+		m_mosqSubscriber->init();
 	}
 
 	~BotApplication() {
 		delete m_mosqSubscriber;
 		m_mosqSubscriber = nullptr;
-		m_mosqCallback = nullptr;
+	}
+
+	static BotApplication *getApp(function<void(BotCommand &)> &&func = {}) {
+		static BotApplication *app = nullptr;
+		if (app == nullptr) {
+			app = new BotApplication(std::move(func));
+		}
+		return app;
 	}
 
 	int run() override {

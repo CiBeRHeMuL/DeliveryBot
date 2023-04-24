@@ -5,11 +5,14 @@
 
 #include <map>
 
-class RequestAbstract : public virtual RequestInterface {
+template<class T>
+class RequestAbstract : public virtual RequestInterface<T> {
 protected:
-	map<string, string> m_data = {};
+	T m_data = {};
 
-	SerializerInterface<map<string, string>> *m_serializer;
+	SerializerInterface<T> *m_serializer;
+
+	string m_rawBody;
 
 	/**
 	 * Needs to update body
@@ -17,37 +20,23 @@ protected:
 	bool m_dataUpdated = false;
 
 public:
-	explicit RequestAbstract(SerializerInterface<map<string, string>> *serializer) : m_serializer(serializer) {}
+	RequestAbstract(SerializerInterface<T> *serializer) : RequestInterface<T>(), m_serializer(serializer) {}
 
 	~RequestAbstract() {
 		m_serializer = nullptr;
-		m_data.clear();
 	}
 
-	map<string, string> getData() {
+	T getData() override {
 		return m_data;
 	}
 
-	string getData(const string &key, const string &defaultValue = "") {
-		try {
-			return m_data.at(key);
-		} catch (...) {
-			return defaultValue;
-		}
-	}
-
-	void setData(map<string, string> &&data) {
+	void setData(const T &data) override {
 		m_data = data;
 		m_dataUpdated = true;
 	}
 
-	void addData(map<string, string> &&data) {
-		m_data.merge(data);
-		m_dataUpdated = true;
-	}
-
-	void addData(const string& key, const string& datum) {
-		m_data[key] = datum;
+	void setData(T &&data) override {
+		m_data = std::move(data);
 		m_dataUpdated = true;
 	}
 
@@ -62,7 +51,7 @@ public:
 		if (m_dataUpdated) {
 			m_rawBody = m_serializer->serialize(m_data);
 		}
-		return RequestInterface::getRawBody();
+		return m_rawBody;
 	}
 
 protected:

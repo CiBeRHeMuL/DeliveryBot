@@ -103,11 +103,11 @@ protected:
 			case SettingType::TYPE_LONG:
 				return convertValue<long, To>(m_longValue);
 			case SettingType::TYPE_ULONG:
-				return convertValue<long, To>(m_uLongValue);
+				return convertValue<unsigned long, To>(m_uLongValue);
 			case SettingType::TYPE_LONG_LONG:
-				return convertValue<long, To>(m_lLongValue);
+				return convertValue<long long, To>(m_lLongValue);
 			case SettingType::TYPE_ULONG_LONG:
-				return convertValue<long, To>(m_uLLongValue);
+				return convertValue<unsigned long long, To>(m_uLLongValue);
 			case SettingType::TYPE_BOOL:
 				return convertValue<bool, To>(m_boolValue);
 			case SettingType::TYPE_FLOAT:

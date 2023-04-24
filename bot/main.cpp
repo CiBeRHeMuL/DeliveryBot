@@ -5,14 +5,13 @@
 
 using namespace std;
 
-BotApplication *g_application;
+BotApplication *app;
 
-void callback(mosquitto *mosquitto, void *user, const mosquitto_message *message) {
-	cout << "Message receiving from [" + string(message->topic) + "]\n";
-	cout << string(static_cast<char *>(message->payload), message->payloadlen) << "\n";
+void callback(BotCommand &cmd) {
+	app->getLogger()->info(cmd.toQueryString());
 }
 
 int main() {
-	g_application = new BotApplication(callback);
-	g_application->run();
+	app = BotApplication::getApp(callback);
+	return app->run();
 }

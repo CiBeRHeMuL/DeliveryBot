@@ -22,50 +22,6 @@ protected:
 			elem->m_strId = line.substr(0, line.find('='));
 			string value = line.substr(line.find('=') + 1);
 			elem->m_level = 2;
-			if (value == "true" || value == "false") {
-				elem->m_boolValue = value == "true";
-				elem->m_type = SettingType::TYPE_BOOL;
-			}
-			try {
-				elem->m_floatValue = stof(value);
-				elem->m_type = SettingType::TYPE_FLOAT;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_doubleValue = stod(value);
-				elem->m_type = SettingType::TYPE_DOUBLE;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_lDoubleValue = stold(value);
-				elem->m_type = SettingType::TYPE_LONG_DOUBLE;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_intValue = stoi(value);
-				elem->m_type = SettingType::TYPE_INT;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_longValue = stol(value);
-				elem->m_type = SettingType::TYPE_LONG;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_uLongValue = stoul(value);
-				elem->m_type = SettingType::TYPE_ULONG;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_lLongValue = stoll(value);
-				elem->m_type = SettingType::TYPE_LONG_LONG;
-				return elem;
-			} catch (...) {}
-			try {
-				elem->m_uLLongValue = stoull(value);
-				elem->m_type = SettingType::TYPE_ULONG_LONG;
-				return elem;
-			} catch (...) {}
 			elem->m_type = SettingType::TYPE_STRING;
 			elem->m_stringValue = value;
 		} else {

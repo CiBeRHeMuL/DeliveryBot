@@ -14,34 +14,38 @@ protected:
 
 	int *m_msgId;
 
-	string m_clientId = "mosq_client_id";
+	bool m_isInitiated = false;
 
 	/**
-	 * Надо вызвать в конструкторе для загрузки id клиента из конфига
+	 * Сщташп
 	 */
-	void connectToMQTTBroker() {
+	string m_clientId = MOSQUITTO_CLIENT_ID;
+	string m_host = MOSQUITTO_HOST;
+	int m_port = MOSQUITTO_PORT;
+	int m_keepAliveSec = MOSQUITTO_KEEPALIVE_SECONDS;
+	string m_topic = MOSQUITTO_DEFAULT_TOPIC;
+	int m_QoS = MOSQUITTO_DEFAULT_QoS;
+	bool m_retaining = MOSQUITTO_DEFAULT_MESSAGE_RETAINING;
+
+public:
+	explicit MosquittoAbstract() : m_msgId(new int(0)) {}
+
+	/**
+	 * Must be called after instantiation
+	 */
+	virtual void init() {
+		mosquitto_lib_init();
 		m_mosquitto = mosquitto_new(m_clientId.c_str(), false, nullptr);
 		if (m_mosquitto == nullptr) {
 			throw MosquittoException("Failed to instantiate mosquitto client");
-		} else {
-			int connectRes = mosquitto_connect(m_mosquitto, MOSQUITTO_HOST, MOSQUITTO_PORT, MOSQUITTO_KEEPALIVE_SECONDS);
-			if (connectRes != MOSQ_ERR_SUCCESS) {
-				throw MosquittoException("Failed to connect to mosquitto broker");
-			}
 		}
-	}
-
-public:
-	explicit MosquittoAbstract(bool loadMQTTLazy = true) : m_msgId(new int(0)) {
-		if (!loadMQTTLazy) {
-			connectToMQTTBroker();
-		}
+		m_isInitiated = true;
 	}
 
 	~MosquittoAbstract() {
-		mosquitto_disconnect(m_mosquitto);
 		mosquitto_destroy(m_mosquitto);
 		m_mosquitto = nullptr;
 		m_msgId = nullptr;
+		mosquitto_lib_cleanup();
 	}
 };

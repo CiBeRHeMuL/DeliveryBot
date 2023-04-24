@@ -4,5 +4,5 @@
 
 class EngineAbstract {
 public:
-	virtual size_t move(const DirectionAbstract &, size_t stepsCount) = 0;
+	virtual size_t move(int stepsCount) = 0;
 };

@@ -38,6 +38,14 @@ public:
 		m_logger = new Logger(createLogger(appConfig->getChildById("logName")->getString()));
 	}
 
+	static ServerApplication *getApp(function<int()> &&func = {}) {
+		static ServerApplication *app = nullptr;
+		if (app == nullptr) {
+			app = new ServerApplication(std::move(func));
+		}
+		return app;
+	}
+
 	int run() override {
 		try {
 			return m_func();
