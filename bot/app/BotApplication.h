@@ -5,14 +5,13 @@
 #include "../../common/base/exception/ConfigException.h"
 #include "../../common/base/log/ConsoleLog.h"
 #include "../../common/base/network/component/MosquittoSubscriber.h"
-#include "../../common/base/command/BotCommand.h"
 
 #include <sstream>
 #include <filesystem>
 
 class BotApplication : public virtual ApplicationAbstract {
 protected:
-	function<void(BotCommand &)> m_callback;
+	void (*m_mosqCallback) (mosquitto *mosquitto, void *user, const mosquitto_message *message);
 
 	MosquittoSubscriber *m_mosqSubscriber;
 
@@ -29,33 +28,17 @@ protected:
 		return config;
 	}
 
-	static void baseMosquittoCallback(mosquitto *mosquitto, void *user, const mosquitto_message *message) {
-		stringstream ss(string(reinterpret_cast<char *>(message->payload), message->payloadlen));
-		BotCommand cmd;
-		string a(reinterpret_cast<char *>(message->payload), message->payloadlen);
-
-		string key;
-		string data;
-		while (!ss.eof()) {
-			getline(ss, key, '=');
-			getline(ss, data, '\n');
-			cmd.setInstruction(key, data);
-		}
-		auto *app = BotApplication::getApp();
-		app->m_callback(cmd);
-	}
-
 public:
 	const char *CONFIG_FILE = "/bot.ini";
 
-	explicit BotApplication(function<void(BotCommand &)> &&func) : m_callback(std::move(func))
+	explicit BotApplication(void (*callback) (mosquitto *mosquitto, void *user, const mosquitto_message *message)) : m_mosqCallback(callback)
 	{
 		m_config = createConfig();
 		if (m_config->getRoot() == nullptr) {
 			throw ConfigException("Config not set");
 		}
 		m_logger = new Logger(createLogger(m_config->getRoot()->getChildById("App")->getChildById("logName")->getString()));
-		m_mosqSubscriber = new MosquittoSubscriber(m_config->getRoot()->getChildById("Mosquitto"), baseMosquittoCallback);
+		m_mosqSubscriber = new MosquittoSubscriber(m_config->getRoot()->getChildById("Mosquitto"), m_mosqCallback);
 		m_mosqSubscriber->init();
 	}
 
@@ -64,10 +47,13 @@ public:
 		m_mosqSubscriber = nullptr;
 	}
 
-	static BotApplication *getApp(function<void(BotCommand &)> &&func = {}) {
+	static BotApplication *getApp(void (*callback) (mosquitto *mosquitto, void *user, const mosquitto_message *message) = nullptr) {
 		static BotApplication *app = nullptr;
 		if (app == nullptr) {
-			app = new BotApplication(std::move(func));
+			if (callback == nullptr) {
+				throw ConfigException("Cannot initialize bot application without callback");
+			}
+			app = new BotApplication(callback);
 		}
 		return app;
 	}

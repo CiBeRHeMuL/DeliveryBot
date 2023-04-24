@@ -1,7 +1,7 @@
 #include "app/ServerApplication.h"
 #include "network/request/MQTTRequest.h"
-#include "../common/base/command/BotCommand.h"
-#include "network/serialiazer/CommandSerializer.h"
+#include "command/BotCommand.h"
+#include "network/serialiazer/BotCommandSerializer.h"
 #include "network/component/ServerMosquittoPublisher.h"
 
 #include <iostream>
@@ -20,15 +20,15 @@ int loop() {
 		}
 	}
 
-	auto request = MQTTRequest<BotCommand *>(reinterpret_cast<SerializerInterface<BotCommand*>*>(new CommandSerializer));
+	auto request = MQTTRequest<BotCommand>(new BotCommandSerializerfi);
 	string input;
 	cin >> input;
 	while(input != "exit") {
 		BotCommand cmd;
-		cmd.setAction("move");
-		cmd.setInstruction("statuses[steps][x]", "10");
-		cmd.setInstruction("statuses[steps][y]", "20");
-		request.setData(&cmd);
+		cmd.setAction(BotCommand::Action::FORWARD);
+		cmd.setSpeed(0.4);
+		cmd.setValue(1.6);
+		request.setData(cmd);
 		request.send();
 		app->getLogger()->warning(to_string(ServerMosquittoPublisher::getInstance()->getLastResult()));
 		cin >> input;

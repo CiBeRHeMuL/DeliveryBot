@@ -7,8 +7,8 @@ using namespace std;
 
 BotApplication *app;
 
-void callback(BotCommand &cmd) {
-	app->getLogger()->info(cmd.toQueryString());
+void callback(mosquitto *mosquitto, void *user, const mosquitto_message *message) {
+	app->getLogger()->info(string(reinterpret_cast<char *>(message->payload), message->payloadlen));
 }
 
 int main() {

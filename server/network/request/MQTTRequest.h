@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../common/base/network/request/RequestAbstract.h"
-#include "../../../common/network/serializer/MapSerializer.h"
+#include "../../../common/base/network/serializer/SerializerAbstract.h"
 #include "../component/ServerMosquittoPublisher.h"
 
 template<class T = map<string, string>>
@@ -10,7 +10,7 @@ protected:
 	ServerMosquittoPublisher *m_publisher;
 
 public:
-	explicit MQTTRequest(SerializerInterface<T> *serializer) : RequestAbstract<T>(serializer) {
+	explicit MQTTRequest(SerializerAbstract<T> *serializer) : RequestAbstract<T>(serializer) {
 		m_publisher = ServerMosquittoPublisher::getInstance();
 	}
 
