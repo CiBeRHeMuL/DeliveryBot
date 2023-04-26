@@ -1,11 +1,26 @@
 version: "3.9"
 services:
-  opencv-bot:
-    image: spmallick/opencv-docker:opencv
-    container_name: opencv-bot-container
-  cmake-bot:
-    image: anvari/cmake
-    container_name: cmake-bot-container
-  gcc-bot:
-    image: gcc
-    container_name: gcc-bot-container
+  delivery-bot-bot:
+    container_name: delivery-bot-bot
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /projects/delivery-bot/
+    entrypoint: ["./docker/entry.sh", "bot"]
+    environment:
+      MQTT_PORT: 1883
+    ports:
+      - "1883:1883"
+  delivery-bot-server:
+    container_name: delivery-bot-server
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /projects/delivery-bot/
+    entrypoint: ["./docker/entry.sh", "server"]
+    tty: true
+    stdin_open: true
+    environment:
+      MQTT_PORT: 1884
+    ports:
+      - "1884:1883"

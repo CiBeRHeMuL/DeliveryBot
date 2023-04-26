@@ -1,0 +1,4 @@
+*.puml
+Dockerfile
+docker-compose.yml*
+/build*

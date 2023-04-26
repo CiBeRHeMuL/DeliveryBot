@@ -8,6 +8,7 @@
 #include "../../common/base/command/BotCommand.h"
 
 #include <sstream>
+#include <filesystem>
 
 class BotApplication : public virtual ApplicationAbstract {
 protected:
@@ -24,7 +25,7 @@ protected:
 
 	IniConfig *createConfig() {
 		auto *config = new IniConfig;
-		config->readFile(CONFIG_FILE);
+		config->readFile(filesystem::current_path().c_str() + string(CONFIG_FILE));
 		return config;
 	}
 
@@ -45,13 +46,13 @@ protected:
 	}
 
 public:
-	const char *CONFIG_FILE = "bot.ini";
+	const char *CONFIG_FILE = "/bot.ini";
 
 	explicit BotApplication(function<void(BotCommand &)> &&func) : m_callback(std::move(func))
 	{
 		m_config = createConfig();
 		if (m_config->getRoot() == nullptr) {
-			throw ConfigException("Invalid config");
+			throw ConfigException("Config not set");
 		}
 		m_logger = new Logger(createLogger(m_config->getRoot()->getChildById("App")->getChildById("logName")->getString()));
 		m_mosqSubscriber = new MosquittoSubscriber(m_config->getRoot()->getChildById("Mosquitto"), baseMosquittoCallback);
