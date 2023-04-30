@@ -28,10 +28,18 @@ protected:
 		return config;
 	}
 
+	int callback() {
+		m_mosqSubscriber->startListen();
+		while (m_mosqSubscriber->isListening()) {}
+		m_mosqSubscriber->stopListen();
+		return 0;
+	}
+
 public:
 	const char *CONFIG_FILE = "/bot.ini";
 
-	explicit BotApplication(void (*callback) (mosquitto *mosquitto, void *user, const mosquitto_message *message)) : m_mosqCallback(callback)
+	explicit BotApplication(void (*callback) (mosquitto *mosquitto, void *user, const mosquitto_message *message))
+		: m_mosqCallback(callback), ApplicationAbstract([this] { return this->callback(); })
 	{
 		m_config = createConfig();
 		if (m_config->getRoot() == nullptr) {
@@ -56,18 +64,5 @@ public:
 			app = new BotApplication(callback);
 		}
 		return app;
-	}
-
-	int run() override {
-		try {
-			m_mosqSubscriber->startListen();
-			while (m_mosqSubscriber->isListening()) {}
-			return 0;
-		} catch (const ExceptionBase &e) {
-			BotApplication::getLogger()->error(e.what());
-		} catch (...) {
-			BotApplication::getLogger()->error("An error occurred");
-		}
-		return -1;
 	}
 };

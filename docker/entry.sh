@@ -11,8 +11,14 @@ fi
 
 exe() { echo "$@"; eval "$@"; }
 
-exe "cd /projects/delivery-bot && mkdir build";
-exe "/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G \"CodeBlocks - Unix Makefiles\" -S /projects/delivery-bot/ -B /projects/delivery-bot/build/";
-exe "/usr/bin/cmake --build /projects/delivery-bot/build --target DeliveryBot${target} -- -j 20";
-exe "cp config/$1/$1.ini build/$1/$1.ini"
-exe "mosquitto -v -p $MQTT_PORT";
+exe "mkdir build";
+exe "/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G \"CodeBlocks - Unix Makefiles\" -S . -B ./build";
+exe "/usr/bin/cmake --build ./build --target DeliveryBot$target -- -j 20";
+exe "cp ./config/$1/$1.ini ./build/$1/$1.ini";
+
+if [ "$1" = "server" ]; then
+  exe "mosquitto -v -c ./config/mosquitto/mosquitto.conf";
+elif [ "$1" = "bot" ]; then
+  exe "cd ./build/$1";
+  exe "./DeliveryBot$target";
+fi

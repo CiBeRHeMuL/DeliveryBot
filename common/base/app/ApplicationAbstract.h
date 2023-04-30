@@ -3,6 +3,7 @@
 #include "ApplicationInterface.h"
 #include "../config/ConfigInterface.h"
 #include "../log/Logger.h"
+#include "../exception/ExceptionBase.h"
 
 class ApplicationAbstract : public virtual ApplicationInterface {
 protected:
@@ -29,7 +30,14 @@ public:
 	}
 
 	int run() override {
-		return 0;
+		try {
+			return m_func();
+		} catch (const ExceptionBase &ex) {
+			m_logger->error(ex.what());
+		} catch (...) {
+			m_logger->error("An error occurred");
+		}
+		return -1;
 	}
 
 	ConfigInterface *getConfig() {

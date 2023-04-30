@@ -7,10 +7,10 @@ services:
       dockerfile: ./Dockerfile
     working_dir: /projects/delivery-bot/
     entrypoint: ["./docker/entry.sh", "bot"]
-    environment:
-      MQTT_PORT: 1883
-    ports:
-      - "1883:1883"
+    networks:
+      - delivery-bot-network
+    depends_on:
+      - delivery-bot-server
   delivery-bot-server:
     container_name: delivery-bot-server
     build:
@@ -18,9 +18,10 @@ services:
       dockerfile: ./Dockerfile
     working_dir: /projects/delivery-bot/
     entrypoint: ["./docker/entry.sh", "server"]
-    tty: true
-    stdin_open: true
-    environment:
-      MQTT_PORT: 1884
-    ports:
-      - "1884:1883"
+    networks:
+      - delivery-bot-network
+
+networks:
+  delivery-bot-network:
+    driver: bridge
+    name: delivery-bot-network

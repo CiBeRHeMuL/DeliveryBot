@@ -47,15 +47,4 @@ public:
 		}
 		return app;
 	}
-
-	int run() override {
-		try {
-			return m_func();
-		} catch (const ExceptionBase &e) {
-			ServerApplication::getLogger()->error(e.what());
-		} catch (...) {
-			ServerApplication::getLogger()->error("An error occurred");
-		}
-		return -1;
-	}
 };

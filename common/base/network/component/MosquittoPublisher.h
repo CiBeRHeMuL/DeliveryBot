@@ -15,7 +15,7 @@ protected:
 
 	SettingInterface *m_config;
 
-	void readConfig(SettingInterface &config) {
+	virtual void readConfig(SettingInterface &config) {
 		try {
 			m_topic = static_cast<string>(config["topic"]);
 			m_QoS = static_cast<int>(config["QoS"]);
@@ -27,6 +27,10 @@ protected:
 		} catch (...) {
 			throw MosquittoException("Invalid config");
 		}
+	}
+
+	virtual int connect() {
+		return mosquitto_connect(m_mosquitto, m_host.c_str(), m_port, m_keepAliveSec);
 	}
 
 public:
@@ -54,7 +58,7 @@ public:
 		if (!m_isInitiated) {
 			throw MosquittoException("Failed to publish via not initiated publisher+");
 		}
-		int connectRes = mosquitto_connect(m_mosquitto, m_host.c_str(), m_port, m_keepAliveSec);
+		int connectRes = connect();
 		if (connectRes != MOSQ_ERR_SUCCESS) {
 			throw MosquittoException("Failed to connect to mosquitto broker");
 		}
