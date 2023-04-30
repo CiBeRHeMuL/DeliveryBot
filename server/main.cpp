@@ -20,7 +20,7 @@ int loop() {
 		}
 	}
 
-	auto request = MQTTRequest<BotCommand>(new BotCommandSerializerfi);
+	auto request = MQTTRequest<BotCommand>(new BotCommandSerializer);
 	string input;
 	cin >> input;
 	while(input != "exit") {
